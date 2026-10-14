@@ -16,16 +16,40 @@ export default function Contact() {
     message: ''
   });
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [resultMessage, setResultMessage] = useState<string>('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus('submitting');
-    
-    // Simulate network request
-    setTimeout(() => {
+    setResultMessage('Sending...');
+
+    const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "b41cf780-3f86-4081-9a83-42a47febcc2f";
+
+    const payload = new FormData(e.currentTarget);
+    payload.append("access_key", accessKey);
+    payload.append("from_name", "Umer Baig Portfolio");
+    payload.append("subject", `New Inquiry: ${formData.name || "Website Lead"} - ${formData.service || "General"}`);
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: payload
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setStatus('success');
+        setResultMessage(data.message || "Thank you! Your message has been sent successfully. I will get back to you shortly.");
+        setFormData({ name: '', email: '', company: '', service: '', message: '' });
+      } else {
+        setStatus('error');
+        setResultMessage(data.message || "Something went wrong while submitting the form. Please try again or reach out directly via email.");
+      }
+    } catch (error) {
+      console.error("Web3Forms submission error:", error);
       setStatus('error');
-      // In a real implementation, this would connect to a form backend like Formspree, Netlify Forms, or a custom API.
-    }, 1500);
+      setResultMessage("Unable to send your message right now. Please check your internet connection or email me directly.");
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -162,9 +186,22 @@ export default function Contact() {
                 ></textarea>
               </div>
 
+              {status === 'success' && (
+                <div className="p-4 bg-emerald-950/40 border border-emerald-500/50 rounded-lg text-emerald-200 text-sm flex items-start gap-3">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>{resultMessage}</span>
+                </div>
+              )}
+
               {status === 'error' && (
-                <div className="p-4 bg-red-900/20 border border-red-500/50 rounded text-red-200 text-sm">
-                  This form is currently in demonstration mode. Please contact me directly at <a href={`mailto:${profile.contact.email}`} className="underline hover:text-gold">{profile.contact.email}</a> to send a message.
+                <div className="p-4 bg-red-950/40 border border-red-500/50 rounded-lg text-red-200 text-sm">
+                  <p className="mb-2">{resultMessage}</p>
+                  <p className="text-xs text-red-300/80">
+                    You can also email me directly at{" "}
+                    <a href={`mailto:${profile.contact.email}`} className="underline hover:text-gold text-gold font-medium">
+                      {profile.contact.email}
+                    </a>.
+                  </p>
                 </div>
               )}
 
