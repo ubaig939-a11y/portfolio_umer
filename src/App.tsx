@@ -5,6 +5,7 @@ import About from './components/sections/About';
 import Services from './components/sections/Services';
 import Results from './components/sections/Results';
 import SeoCaseStudies from './components/sections/SeoCaseStudies';
+import GmbCaseStudies from './components/sections/GmbCaseStudies';
 import GoogleAdsCaseStudies from './components/sections/GoogleAdsCaseStudies';
 import Process from './components/sections/Process';
 import TechnicalSeo from './components/sections/TechnicalSeo';
@@ -22,6 +23,7 @@ function App() {
         <Services />
         <Results />
         <SeoCaseStudies />
+        <GmbCaseStudies />
         <GoogleAdsCaseStudies />
         <Process />
         <TechnicalSeo />
